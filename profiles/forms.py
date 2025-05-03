@@ -4,6 +4,7 @@ Defines forms for creating and managing user accounts.
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
@@ -62,6 +63,7 @@ class CreateUserForm(forms.Form):
     )
     password = forms.CharField(
         label='',
+        validators=[validate_password],
         widget=forms.PasswordInput(
             attrs={
                 'class': 'form-control',
@@ -71,6 +73,7 @@ class CreateUserForm(forms.Form):
     )
     confirm_password = forms.CharField(
         label='',
+        validators=[validate_password],
         widget=forms.PasswordInput(
             attrs={
                 'class': 'form-control',
@@ -116,6 +119,10 @@ class MobileNumberForm(forms.Form):
             }
         )
     )
+
+
+class MobileNumberVerificationForm(MobileNumberForm):
+
     sms_token = forms.CharField(
         label='',
         min_length=6,
@@ -150,7 +157,7 @@ class EmailForm(forms.Form):
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'Email'
+                'placeholder': 'Confirm Email'
             }
         )
     )

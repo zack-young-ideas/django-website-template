@@ -3,6 +3,7 @@ Defines view functions for creating and managing user accounts.
 """
 
 from django.contrib import auth, messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from profiles import forms
@@ -27,6 +28,7 @@ def create_user(request):
             )
             user.set_password(form.cleaned_data['password'])
             user.save()
+            auth.login(request, user)
             return redirect('add_mobile_number')
         errors = [text for value in form.errors.values() for text in value]
         for item in errors:
@@ -35,9 +37,20 @@ def create_user(request):
     return render(request, 'registration/create_user.html', context)
 
 
+@login_required
 def add_mobile_number(request):
     """
     Prompts a new user to add their mobile phone.
     """
-    context = {'form': forms.MobileNumberForm()}
+    if request.method == 'POST':
+        form = forms.MobileNumberVerificationForm(data=request.POST)
+        if form.is_valid():
+            return redirect('add_email')
+    context = {'form': forms.MobileNumberVerificationForm()}
     return render(request, 'registration/add_mobile_number.html', context)
+
+
+@login_required
+def add_email(request):
+    context = {'form': forms.EmailForm()}
+    return render(request, 'registration/add_email.html', context)

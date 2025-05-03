@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'phonenumber_field',
+    'profiles',
 ]
 
 MIDDLEWARE = [
@@ -103,12 +104,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 12,
+        },
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'profiles.utils.SpecialCharacterPasswordValidator',
     },
 ]
 
@@ -141,3 +148,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Secret key used to create new users.
 SECRET_SAUCE = get_env_variable('SECRET_KEY')
+
+# When a function is supposed to send an SMS message to a user
+# in development, the content of the message is written to a
+# file on the local filesystem.
+SMS_BACKEND = 'drivers.backends.locmem.SmsBackend'

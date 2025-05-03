@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Mobile Number{% endblock %}
+{% block title %}Email Address{% endblock %}
 
 {% block content %}
 <div class="container px-4 text-center">
@@ -9,24 +9,15 @@
     <div class="col-12 mt-4">
       <form method="post" action="{% url 'add_mobile_number' %}">
         <fieldset class="border p-4">
-          <legend class="h2 mb-3">Mobile Number</legend>
-          <p>Please enter your mobile phone number.
-          You will receive a unique 6-digit
-          code to verify your number.</p>
+          <legend class="h2 mb-3">Email Address</legend>
+          <p>Please enter your email address.</p>
           {{ form.as_p }}
           {% csrf_token %}
           <p class="text-danger" style="display:none;"></p>
-          <button
-            class="btn btn-primary mb-3 px-5"
-            id="verify_button"
-          />
-            Verify
-          </button>
           <input
             class="btn btn-primary mb-3 px-5"
             id="submit_button"
             name="submit"
-            style="display:none;"
             type="submit"
             value="Submit"
           />
