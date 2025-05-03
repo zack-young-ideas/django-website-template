@@ -4,9 +4,10 @@ Defines view functions for creating and managing user accounts.
 
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 
-from profiles import forms
+from profiles import forms, models
 
 
 User = auth.get_user_model()
@@ -22,7 +23,6 @@ def create_user(request):
         form = forms.CreateUserForm(data=request.POST)
         if form.is_valid():
             user = User(
-                username='',
                 first_name=form.cleaned_data['first_name'],
                 last_name=form.cleaned_data['last_name'],
             )
@@ -45,12 +45,58 @@ def add_mobile_number(request):
     if request.method == 'POST':
         form = forms.MobileNumberVerificationForm(data=request.POST)
         if form.is_valid():
-            return redirect('add_email')
+            sms_token = form.cleaned_data['sms_token']
+            if request.user.check_sms_token(sms_token):
+                return redirect('add_email')
+            else:
+                messages.error(request, 'Invalid SMS code.')
     context = {'form': forms.MobileNumberVerificationForm()}
     return render(request, 'registration/add_mobile_number.html', context)
 
 
 @login_required
 def add_email(request):
+    """
+    Prompts a new user to add their email address.
+    """
+    if request.method == 'POST':
+        form = forms.EmailForm(data=request.POST)
+        if form.is_valid():
+            email_address = form.cleaned_data['email']
+            request.user.add_email_address(email_address)
+            return redirect('create_user_success')
+        errors = [text for value in form.errors.values() for text in value]
+        for item in errors:
+            messages.error(request, item)
     context = {'form': forms.EmailForm()}
     return render(request, 'registration/add_email.html', context)
+
+
+@login_required
+def create_user_success(request):
+    """
+    Prompts a new user to follow the link in the email sent to them.
+    """
+    return render(request, 'registration/create_user_success.html')
+
+
+def email_verification(request, verification_token):
+    """
+    The link a user must follow in order to verify their email address.
+    """
+    form = forms.EmailVerificationTokenForm({
+        'verification_token': verification_token
+    })
+    if form.is_valid():
+        try:
+            verification_token = form.cleaned_data['verification_token']
+            email_token = models.EmailToken.objects.check_token(
+                token=verification_token
+            )
+        except models.EmailToken.DoesNotExist:
+            raise Http404()
+        else:
+            return render(
+                request,
+                'registration/email_verification_success.html'
+            )

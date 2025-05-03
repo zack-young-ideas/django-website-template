@@ -15,7 +15,15 @@
           code to verify your number.</p>
           {{ form.as_p }}
           {% csrf_token %}
-          <p class="text-danger" style="display:none;"></p>
+          {% for message in messages %}
+            <p class="text-danger">{{ message }}</p>
+          {% endfor %}
+          <p
+            class="text-danger"
+            id="error_message"
+            style="display:none;"
+          >
+          </p>
           <button
             class="btn btn-primary mb-3 px-5"
             id="verify_button"
@@ -30,6 +38,7 @@
             type="submit"
             value="Submit"
           />
+          <p><a href="{% url 'login' %}">Return to login</a></p>
         </fieldset>
       </form>
     </div>

@@ -7,8 +7,8 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 
-from drivers import sms, send_sms_message
-from profiles import forms, models
+from drivers import sms
+from profiles import forms
 
 
 @login_required
@@ -18,16 +18,7 @@ def verify_mobile_number(request):
         form = forms.MobileNumberForm(data)
         if form.is_valid():
             mobile_number = str(form.cleaned_data['mobile_number'])
-            sms_message = 'Your mobile verification code is {0}.'
-            token_object = models.PhoneToken(
-                phone=mobile_number,
-                user=request.user
-            )
-            token_object.save()
-            send_sms_message(
-                sms_message.format(token_object.token),
-                mobile_number
-            )
+            request.user.add_new_mobile_number(mobile_number)
             print(sms.messages[0].message)
             return HttpResponse(content_type='application/json')
         else:

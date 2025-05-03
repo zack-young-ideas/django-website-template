@@ -98,6 +98,8 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
+AUTH_USER_MODEL = 'profiles.User'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -153,3 +155,12 @@ SECRET_SAUCE = get_env_variable('SECRET_KEY')
 # in development, the content of the message is written to a
 # file on the local filesystem.
 SMS_BACKEND = 'drivers.backends.locmem.SmsBackend'
+
+# The site's domain name and scheme to use.
+DOMAIN = 'localhost:8000'
+SCHEME = 'http'
+
+# Email settings.
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / '../inbox'

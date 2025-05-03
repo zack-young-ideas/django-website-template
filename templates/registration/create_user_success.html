@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Success!{% endblock %}
+
+{% block content %}
+<div class="container px-4 text-center">
+  <div class="row">
+    <div class="col-12 mt-4">
+      <h2 class="mb-4">Success!</h2>
+      <p>Your new user account has been successfully create.</p>
+      <p>An email has been sent to your email address with a verification
+      link. Please follow this link to log in.</p>
+      <a
+        class="btn btn-primary mt-3"
+        href="{% url 'login' %}"
+      >
+        Return To Login
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -129,7 +129,7 @@ class MobileNumberVerificationForm(MobileNumberForm):
         max_length=6,
         validators=[RegexValidator(
             regex=r'^\d{6}$',
-            message='Invalid token'
+            message='Invalid SMS token.'
         )],
         widget=forms.TextInput(
             attrs={
@@ -160,4 +160,29 @@ class EmailForm(forms.Form):
                 'placeholder': 'Confirm Email'
             }
         )
+    )
+
+    def clean(self):
+        """
+        Ensures that email addresses match.
+        """
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        confirm_email = cleaned_data.get('confirm_email')
+        if email != confirm_email:
+            self.add_error(
+                'email',
+                ValidationError('Email addresses do not match.')
+            )
+
+
+class EmailVerificationTokenForm(forms.Form):
+
+    verification_token = forms.CharField(
+        min_length=32,
+        max_length=32,
+        validators=[RegexValidator(
+            regex=r'^[A-Za-z0-9]{32}$',
+            message='Invalid email token.'
+        )]
     )
