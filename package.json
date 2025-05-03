@@ -1,0 +1,14 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Zack Young",
+  "type": "commonjs",
+  "scripts": {
+    "sass": "sass scss/main.scss static/styles.css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "sass": "^1.87.0"
+  }
+}

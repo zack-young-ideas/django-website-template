@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<div class="container px-4 text-center">
+  <div class="row">
+    <div class="col-12 mt-4">
+      <form method="post" action="{% url 'create_user' %}">
+        <fieldset class="border p-4">
+          <legend class="h2 mb-3">Create User</legend>
+          {{ form.as_p }}
+          {% csrf_token %}
+          {% for message in messages %}
+            <p class="text-danger">{{ message }}</p>
+          {% endfor %}
+          <input
+            class="btn btn-primary mb-3 px-5"
+            type="submit"
+            value="Create"
+          />
+          <p><a href="{% url 'login' %}">Return to login</a></p>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

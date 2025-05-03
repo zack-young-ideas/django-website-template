@@ -1,0 +1,3 @@
+# Packages required in production.
+
+-r base.txt    # Includes the base.txt requirements file.

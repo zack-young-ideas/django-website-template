@@ -1,0 +1,7 @@
+@use 'vendors/bootstrap' with (
+  $primary: #53b8b8,
+);
+
+.btn, .btn:hover {
+  color: bootstrap.$white;
+}
