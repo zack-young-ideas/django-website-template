@@ -14,6 +14,19 @@ User = auth.get_user_model()
 
 
 def login(request):
+    if request.method == 'POST':
+        form = forms.LoginForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = auth.authenticate(
+                request,
+                username=username,
+                password=password
+            )
+            if (user is not None):
+                auth.login(request, user)
+                return redirect('dashboard')
     context = {'form': forms.LoginForm()}
     return render(request, 'registration/login.html', context)
 
@@ -100,3 +113,14 @@ def email_verification(request, verification_token):
                 request,
                 'registration/email_verification_success.html'
             )
+
+
+@login_required
+def dashboard(request):
+    return render(request, 'registration/dashboard.html')
+
+
+@login_required
+def logout(request):
+    auth.logout(request)
+    return redirect('login')

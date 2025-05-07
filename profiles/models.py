@@ -7,7 +7,7 @@ import secrets
 import string
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.auth.hashers import check_password, make_password
 from django.db import models
 from django.core.mail import send_mail
@@ -23,8 +23,11 @@ class User(AbstractBaseUser):
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
     email = models.EmailField(unique=True)
+    mobile_number = models.CharField(max_length=12)
 
     USERNAME_FIELD = 'email'
+
+    objects = UserManager()
 
     def add_new_mobile_number(self, mobile_number):
         """
@@ -42,16 +45,22 @@ class User(AbstractBaseUser):
         """
         phonetoken_object = self.phonetoken_set.last()
         if phonetoken_object.is_current():
-            return check_password(
+            is_valid = check_password(
                 sms_token,
                 phonetoken_object.token
             )
+            if is_valid:
+                user = phonetoken_object.user
+                mobile_number = phonetoken_object.phone
+                user.mobile_number = mobile_number
+                user.save()
+                return True
         else:
             return False
 
     def add_email_address(self, email_address):
         """
-        Updates a user's email address and sends a verification link.
+        Creates an EmailToken object and sends a verification link.
         """
         token_object = EmailToken(
             email=email_address,
@@ -117,6 +126,10 @@ class CustomEmailTokenManager(models.Manager):
                 email_token_object.token
             )
             if token_exists:
+                user = email_token_object.user
+                email_address = email_token_object.email
+                user.email = email_address
+                user.save()
                 return email_token_object
         raise EmailToken.DoesNotExist
 

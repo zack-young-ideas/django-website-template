@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome!{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header
+    class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom"
+  >
+    <a
+      class="d-flex fs-4 align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
+      href="{% url 'dashboard' %}"
+    >
+      Website
+    </a>
+    <ul class="nav nav-pills">
+      <li class="nav-item">
+        <a
+          class="btn btn-primary"
+          href="{% url 'logout' %}"
+        >
+          Log out
+        </a>
+      </li>
+    </ul>
+  </header>
+</div>
+{% endblock %}

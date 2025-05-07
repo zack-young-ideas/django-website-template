@@ -17,4 +17,6 @@ urlpatterns = [
         views.email_verification,
         name='email_verification'
     ),
+    path('dashboard', views.dashboard, name='dashboard'),
+    path('logout', views.logout, name='logout'),
 ]

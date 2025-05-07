@@ -10,6 +10,7 @@
         <fieldset class="border p-4">
           <legend class="h2 mb-3">Login</legend>
           {{ form.as_p }}
+          {% csrf_token %}
           <input
             class="btn btn-primary mb-3 px-5"
             type="submit"
