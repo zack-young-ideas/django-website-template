@@ -68,6 +68,13 @@ class User(AbstractBaseUser):
         )
         token_object.save()
 
+    async def send_reset_password_email(self):
+        """
+        Creates a ResetPasswordToken object and sends an email.
+        """
+        token_object = ResetPasswordToken(user=self)
+        await token_object.asave()
+
 
 class PhoneToken(models.Model):
 
@@ -75,7 +82,6 @@ class PhoneToken(models.Model):
     phone = models.CharField(max_length=12)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now_add=True)
-    failed_attempts = models.SmallIntegerField(default=0)
 
     def _generate_token(self):
         """
@@ -140,7 +146,6 @@ class EmailToken(models.Model):
     email = models.EmailField(unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now_add=True)
-    failed_attempts = models.SmallIntegerField(default=0)
 
     objects = CustomEmailTokenManager()
 
@@ -199,6 +204,98 @@ class EmailToken(models.Model):
         self.token = make_password(token)
         self._send_email(token, self.email)
         models.Model.save(self, *args, **kwargs)
+
+    def is_current(self):
+        """
+        Returns True if email token was created less than 1 hour ago.
+        """
+        time_difference = timezone.now() - self.datetime
+        one_hour = datetime.timedelta(hours=1)
+        return one_hour > time_difference
+
+
+class CustomResetPasswordTokenManager(models.Manager):
+
+    def check_token(self, token):
+        """
+        Checks to see whether the given token exists.
+        """
+        reset_password_token_objects = self.all()
+        token_exists = False
+        for reset_password_token_object in reset_password_token_objects:
+            token_exists = check_password(
+                token,
+                reset_password_token_object.token
+            )
+            if token_exists:
+                user = reset_password_token_object.user
+                return user
+        raise ResetPasswordToken.DoesNotExist
+
+
+class ResetPasswordToken(models.Model):
+
+    token = models.CharField(max_length=256)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(auto_now_add=True)
+
+    objects = CustomResetPasswordTokenManager()
+
+    async def _generate_token(self):
+        """
+        Creates a unique 32-character string.
+        """
+        alphabet = string.ascii_uppercase + string.ascii_lowercase
+        alphabet += string.digits
+        if not self.token:
+            token = ''.join(
+                secrets.choice(alphabet) for i in range(32)
+            )
+        return token
+
+    async def _send_email(self, token, email_address):
+        """
+        Sends a verification link to a user via email.
+        """
+        # First, determine the URL for the verification link.
+        verification_url = reverse(
+            'reset_password',
+            kwargs={'email_token': token}
+        )
+        # Next, define the default text for the email.
+        default_text = ('Please click the link below to '
+                        'reset your password.\n\n'
+                        '{0}://{1}{2}')
+        text_email_message = default_text.format(
+            settings.SCHEME,
+            settings.DOMAIN,
+            verification_url
+        )
+        # Then, render the HTML content of the email.
+        template_context = {
+            'scheme': settings.SCHEME,
+            'domain': settings.DOMAIN,
+            'path': verification_url,
+        }
+        html_email_message = render_to_string(
+            'password_reset_email.html',
+            template_context
+        )
+        # Finally, send the email.
+        send_mail(
+            'Reset Password',
+            text_email_message,
+            'noreply@{0}'.format(settings.DOMAIN),
+            [email_address],
+            fail_silently=False,
+            html_message=html_email_message
+        )
+
+    async def asave(self, *args, **kwargs):
+        token = await self._generate_token()
+        self.token = make_password(token)
+        await self._send_email(token, self.user.email)
+        await models.Model.asave(self, *args, **kwargs)
 
     def is_current(self):
         """

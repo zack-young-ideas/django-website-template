@@ -2,12 +2,14 @@
 Defines view functions for creating and managing user accounts.
 """
 
+import asyncio
+
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
-from profiles import forms, models
+from profiles import forms, models, utils
 
 
 User = auth.get_user_model()
@@ -28,7 +30,68 @@ def login(request):
                 auth.login(request, user)
                 return redirect('dashboard')
     context = {'form': forms.LoginForm()}
-    return render(request, 'registration/login.html', context)
+    return render(request, 'login.html', context)
+
+
+def forgotten_password(request):
+    context = {'form': forms.ForgottenPasswordForm()}
+    return render(request, 'forgotten_password.html', context)
+
+
+async def sleeper():
+    """
+    Waits a fixed amount of time.
+    """
+    await asyncio.sleep(3)
+
+
+async def forgotten_password_handler(request):
+    if request.method == 'POST':
+        form = forms.ForgottenPasswordForm(data=request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            first, second = await asyncio.gather(
+                sleeper(),
+                utils.reset_password(email=email)
+            )
+            return redirect('forgotten_password_confirmation')
+    raise Http404()
+
+
+def forgotten_password_confirmation(request):
+    return render(request, 'forgotten_password_confirmation.html')
+
+
+def reset_password(request, email_token):
+    try:
+        user = models.ResetPasswordToken.objects.check_token(
+            token=email_token
+        )
+    except models.ResetPasswordToken.DoesNotExist:
+        raise Http404()
+    else:
+        print('Here1')
+        if request.method == 'POST':
+            print('Here1')
+            form = forms.ResetPasswordForm(data=request.POST)
+            if form.is_valid():
+                print('Here3')
+                password = form.cleaned_data['password']
+                print('Here4')
+                user.set_password(password)
+                print('Here5')
+                user.save()
+                print('Here6')
+                return redirect('reset_password_confirmation')
+        context = {
+            'form': forms.ResetPasswordForm(),
+            'token': email_token
+        }
+        return render(request, 'reset_password.html', context)
+
+
+def reset_password_confirmation(request):
+    return render(request, 'reset_password_confirmation.html')
 
 
 def create_user(request):

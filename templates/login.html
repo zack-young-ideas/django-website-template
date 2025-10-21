@@ -16,7 +16,13 @@
             type="submit"
             value="Log in"
           />
-          <p><a href="">Forgot password?</a></p>
+          <p>
+            <a
+              href="{% url 'forgotten_password' %}"
+            >
+              Forgot password?
+            </a>
+          </p>
         </fieldset>
       </form>
     </div>

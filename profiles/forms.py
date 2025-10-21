@@ -186,3 +186,53 @@ class EmailVerificationTokenForm(forms.Form):
             message='Invalid email token.'
         )]
     )
+
+
+class ForgottenPasswordForm(forms.Form):
+
+    email = forms.EmailField(
+        label='',
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Email'
+            }
+        )
+    )
+
+
+class ResetPasswordForm(forms.Form):
+
+    password = forms.CharField(
+        label='',
+        validators=[validate_password],
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Password'
+            }
+        )
+    )
+    confirm_password = forms.CharField(
+        label='',
+        validators=[validate_password],
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Confirm Password'
+            }
+        )
+    )
+
+    def clean(self):
+        """
+        Ensures that passwords match.
+        """
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if password != confirm_password:
+            self.add_error(
+                'password',
+                ValidationError('Passwords do not match.')
+            )

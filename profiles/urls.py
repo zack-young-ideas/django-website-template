@@ -4,6 +4,31 @@ from profiles import views
 
 urlpatterns = [
     path('login', views.login, name='login'),
+    path(
+        'forget/password', 
+        views.forgotten_password, 
+        name='forgotten_password'
+    ),
+    path(
+        'forget/password/handler', 
+        views.forgotten_password_handler, 
+        name='forgotten_password_handler'
+    ),
+    path(
+        'forget/password/confirmation', 
+        views.forgotten_password_confirmation, 
+        name='forgotten_password_confirmation'
+    ),
+    path(
+        'reset/password/confirmation',
+        views.reset_password_confirmation,
+        name='reset_password_confirmation',
+    ),
+    path(
+        'reset/password/<str:email_token>',
+        views.reset_password,
+        name='reset_password',
+    ),
     path('create', views.create_user, name='create_user'),
     path('create/phone', views.add_mobile_number, name='add_mobile_number'),
     path('create/email', views.add_email, name='add_email'),
