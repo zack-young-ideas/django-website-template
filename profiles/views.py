@@ -70,18 +70,12 @@ def reset_password(request, email_token):
     except models.ResetPasswordToken.DoesNotExist:
         raise Http404()
     else:
-        print('Here1')
         if request.method == 'POST':
-            print('Here1')
             form = forms.ResetPasswordForm(data=request.POST)
             if form.is_valid():
-                print('Here3')
                 password = form.cleaned_data['password']
-                print('Here4')
                 user.set_password(password)
-                print('Here5')
                 user.save()
-                print('Here6')
                 return redirect('reset_password_confirmation')
         context = {
             'form': forms.ResetPasswordForm(),
