@@ -43,21 +43,21 @@ def validate_secret_key(value):
 
 class CreateUserForm(forms.Form):
 
-    first_name = forms.CharField(
+    email = forms.EmailField(
         label='',
-        widget=forms.TextInput(
+        widget=forms.EmailInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'First Name'
+                'placeholder': 'Email'
             }
         )
     )
-    last_name = forms.CharField(
+    confirm_email = forms.EmailField(
         label='',
-        widget=forms.TextInput(
+        widget=forms.EmailInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'Last Name'
+                'placeholder': 'Confirm Email'
             }
         )
     )

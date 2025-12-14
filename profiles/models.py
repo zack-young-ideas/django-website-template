@@ -20,8 +20,6 @@ from drivers import send_sms_message
 
 class User(AbstractBaseUser):
 
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
     email = models.EmailField(unique=True)
     mobile_number = models.CharField(max_length=12)
 
@@ -58,12 +56,12 @@ class User(AbstractBaseUser):
         else:
             return False
 
-    def add_email_address(self, email_address):
+    def create_email_token(self):
         """
         Creates an EmailToken object and sends a verification link.
         """
         token_object = EmailToken(
-            email=email_address,
+            email=self.email,
             user=self
         )
         token_object.save()

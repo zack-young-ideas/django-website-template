@@ -31,7 +31,6 @@ urlpatterns = [
     ),
     path('create', views.create_user, name='create_user'),
     path('create/phone', views.add_mobile_number, name='add_mobile_number'),
-    path('create/email', views.add_email, name='add_email'),
     path(
         'create/success',
         views.create_user_success,

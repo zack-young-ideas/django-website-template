@@ -92,10 +92,7 @@ def create_user(request):
     if request.method == 'POST':
         form = forms.CreateUserForm(data=request.POST)
         if form.is_valid():
-            user = User(
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-            )
+            user = User(email=form.cleaned_data['email'])
             user.set_password(form.cleaned_data['password'])
             user.save()
             auth.login(request, user)
@@ -117,29 +114,12 @@ def add_mobile_number(request):
         if form.is_valid():
             sms_token = form.cleaned_data['sms_token']
             if request.user.check_sms_token(sms_token):
-                return redirect('add_email')
+                request.user.create_email_token()
+                return redirect('create_user_success')
             else:
                 messages.error(request, 'Invalid SMS code.')
     context = {'form': forms.MobileNumberVerificationForm()}
     return render(request, 'registration/add_mobile_number.html', context)
-
-
-@login_required
-def add_email(request):
-    """
-    Prompts a new user to add their email address.
-    """
-    if request.method == 'POST':
-        form = forms.EmailForm(data=request.POST)
-        if form.is_valid():
-            email_address = form.cleaned_data['email']
-            request.user.add_email_address(email_address)
-            return redirect('create_user_success')
-        errors = [text for value in form.errors.values() for text in value]
-        for item in errors:
-            messages.error(request, item)
-    context = {'form': forms.EmailForm()}
-    return render(request, 'registration/add_email.html', context)
 
 
 @login_required
